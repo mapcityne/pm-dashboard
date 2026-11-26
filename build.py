@@ -81,7 +81,7 @@ def parse_feed(data):
         for c in el:
             n = _local(c.tag)
             if n == "title":
-                title = (c.text or "").strip()
+                title = html.unescape(html.unescape((c.text or "").strip()))
             elif n == "link":
                 href = c.get("href")
                 if href:
@@ -104,14 +104,16 @@ def parse_sitemap(data):
         if _local(el.tag) != "url":
             continue
         loc = lm = None
+        date_only = False
         for c in el:
             n = _local(c.tag)
             if n == "loc":
                 loc = (c.text or "").strip()
             elif n == "lastmod":
                 lm = parse_date(c.text)
+                date_only = len((c.text or "").strip()) == 10
         if lm:
-            out.append({"title": loc, "url": loc, "at": lm})
+            out.append({"title": loc, "url": loc, "at": lm, "date_only": date_only})
     return out
 
 
@@ -148,7 +150,8 @@ def check_channel(ch):
                 if k not in by_day or p["at"] > by_day[k]["at"]:
                     by_day[k] = p
             page = c.get("page") or ch.get("url", "")
-            res["posts"] = [{"title": "사이트 갱신", "url": page, "at": p["at"]} for p in by_day.values()]
+            res["posts"] = [{"title": "사이트 갱신", "url": page, "at": p["at"],
+                             "date_only": p.get("date_only", False)} for p in by_day.values()]
         else:
             raise ValueError(f"알 수 없는 확인 방식: {kind}")
         res["ok"] = True
@@ -217,8 +220,8 @@ def safe_url(u):
     return u if isinstance(u, str) and u.startswith(("https://", "http://")) else ""
 
 
-def fmt_dt(d):
-    return f"{d:%m/%d} ({WEEK[d.weekday()]}) {d:%H:%M}"
+def fmt_dt(d, date_only=False):
+    return f"{d:%m/%d} ({WEEK[d.weekday()]})" + ("" if date_only else f" {d:%H:%M}")
 
 
 def badge(st):
@@ -281,7 +284,7 @@ def render(channels, results, now):
                 lu = safe_url(last["url"])
                 t = e(last["title"])
                 t = f'<a href="{e(lu)}" target="_blank" rel="noopener">{t}</a>' if lu else t
-                lines.append(f'<div class="row"><span>최근</span><b>{fmt_dt(last["at"])}</b></div>')
+                lines.append(f'<div class="row"><span>최근</span><b>{fmt_dt(last["at"], last.get("date_only"))}</b></div>')
                 lines.append(f'<div class="last">{t}</div>')
             else:
                 lines.append('<div class="row"><span>최근</span><b>기록 없음</b></div>')
@@ -329,7 +332,7 @@ def render(channels, results, now):
         lu = safe_url(p["url"])
         t = e(p["title"])
         t = f'<a href="{e(lu)}" target="_blank" rel="noopener">{t}</a>' if lu else t
-        rows.append(f'<tr><td class="nowrap">{fmt_dt(at)}</td><td class="nowrap">{e(c["name"])}</td><td>{t}</td></tr>')
+        rows.append(f'<tr><td class="nowrap">{fmt_dt(at, p.get("date_only"))}</td><td class="nowrap">{e(c["name"])}</td><td>{t}</td></tr>')
     if not rows:
         rows.append('<tr><td colspan="3" class="empty">표시할 발행 기록이 없습니다.</td></tr>')
 
@@ -361,12 +364,12 @@ def main():
         print(f"[{ch['id']}] ok={r['ok']} posts={len(r['posts'])} {r['error']}")
 
     today_posts = sorted(
-        ((p["at"], ch["name"], p["title"], p["url"]) for ch in channels
+        ((p["at"], ch["name"], p["title"], p["url"], p.get("date_only")) for ch in channels
          for p in results[ch["id"]]["posts"] if p["at"].date() == now.date()),
         key=lambda x: x[0])
     print(f"오늘 발행 {len(today_posts)}건")
-    for at, name, title, url in today_posts:
-        print(f"TODAY|{at:%H:%M}|{name}|{title}|{url}")
+    for at, name, title, url, date_only in today_posts:
+        print(f"TODAY|{'시각 미상' if date_only else f'{at:%H:%M}'}|{name}|{title}|{url}")
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
