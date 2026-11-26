@@ -124,8 +124,11 @@ def check_channel(ch):
         return res
     try:
         if kind == "rss":
-            data, _ = fetch(c["url"])
+            data, headers = fetch(c["url"])
             res["posts"] = parse_feed(data)
+            if not res["posts"]:  # 빈 피드 원인 파악용 로그
+                head = data[:300].decode("utf-8", "replace").replace("\n", " ")
+                print(f"  [{ch['id']}] 빈 피드: {len(data)}바이트, {headers.get('content-type')}, 앞부분: {head}")
         elif kind == "site":
             posts = []
             if c.get("sitemap"):
