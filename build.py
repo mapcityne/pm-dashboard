@@ -126,9 +126,9 @@ def check_channel(ch):
         if kind == "rss":
             data, headers = fetch(c["url"])
             res["posts"] = parse_feed(data)
-            if not res["posts"]:  # 빈 피드 원인 파악용 로그
-                head = data[:300].decode("utf-8", "replace").replace("\n", " ")
-                print(f"  [{ch['id']}] 빈 피드: {len(data)}바이트, {headers.get('content-type')}, 앞부분: {head}")
+            if not res["posts"]:
+                # 글이 하나도 없는 피드는 RSS 비공개·공개 글 없음일 가능성이 높아 누락 대신 확인 실패로 본다
+                raise ValueError("피드가 비어 있음 — 블로그의 RSS 공개 설정이나 공개 글 여부 확인 필요")
         elif kind == "site":
             posts = []
             if c.get("sitemap"):
