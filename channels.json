@@ -27,7 +27,7 @@
   },
   {
     "id": "kapts",
-    "name": "k-apts",
+    "name": "실거래가 리포트",
     "platform": "홈페이지",
     "url": "https://k-apts.co.kr",
     "cycle": "daily",
