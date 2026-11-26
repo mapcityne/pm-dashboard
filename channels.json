@@ -1,0 +1,72 @@
+[
+  {
+    "id": "naver",
+    "name": "네이버 블로그",
+    "platform": "네이버 블로그",
+    "url": "https://blog.naver.com/jinkypia",
+    "cycle": "daily",
+    "cycle_label": "매일",
+    "due": "10:00",
+    "check": {"type": "rss", "url": "https://rss.blog.naver.com/jinkypia.xml"}
+  },
+  {
+    "id": "tistory",
+    "name": "일잘러 자동화 노트",
+    "platform": "티스토리",
+    "url": "https://jinkypia.tistory.com",
+    "cycle": "daily",
+    "cycle_label": "매일 1편 (요일별 주제)",
+    "due": "10:00",
+    "check": {"type": "rss", "url": "https://jinkypia.tistory.com/rss"}
+  },
+  {
+    "id": "blogger",
+    "name": "생활 지원금 노트",
+    "platform": "구글 블로거",
+    "url": "https://mapcityne.blogspot.com",
+    "cycle": "daily",
+    "cycle_label": "매일 1편",
+    "due": "10:00",
+    "check": {"type": "rss", "url": "https://mapcityne.blogspot.com/feeds/posts/default?alt=rss"}
+  },
+  {
+    "id": "kapts",
+    "name": "k-apts",
+    "platform": "홈페이지",
+    "url": "https://k-apts.co.kr",
+    "cycle": "daily",
+    "cycle_label": "매일 데이터 갱신",
+    "due": "09:00",
+    "check": {"type": "site", "sitemap": "https://k-apts.co.kr/sitemap.xml", "page": "https://k-apts.co.kr/"}
+  },
+  {
+    "id": "kmong",
+    "name": "크몽 전자책",
+    "platform": "크몽",
+    "url": "https://kmong.com",
+    "cycle": "none",
+    "cycle_label": "비정기",
+    "check": {"type": "manual"},
+    "note": "승인 대기"
+  },
+  {
+    "id": "sns",
+    "name": "SNS 홍보",
+    "platform": "SNS",
+    "url": "",
+    "cycle": "none",
+    "cycle_label": "준비 중",
+    "check": {"type": "manual"},
+    "note": "준비 중"
+  },
+  {
+    "id": "shorts",
+    "name": "숏폼 영상",
+    "platform": "유튜브 쇼츠",
+    "url": "",
+    "cycle": "none",
+    "cycle_label": "보류",
+    "check": {"type": "manual"},
+    "note": "보류"
+  }
+]

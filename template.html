@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>프로젝트PM 발행 현황판</title>
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#fff; --fg:#1b1f24; --muted:#6b7280; --line:#e5e7eb;
+  --ok:#15803d; --ok-bg:#dcfce7; --bad:#b91c1c; --bad-bg:#fee2e2;
+  --warn:#a16207; --warn-bg:#fef3c7; --info:#1d4ed8; --info-bg:#dbeafe;
+  --soft:#f3f4f6; --radius:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0f1115; --panel:#171a21; --fg:#e7e9ee; --muted:#9aa3b2; --line:#272c36;
+    --ok:#4ade80; --ok-bg:#12301d; --bad:#f87171; --bad-bg:#3a1515;
+    --warn:#fbbf24; --warn-bg:#3a2c0d; --info:#93c5fd; --info-bg:#172a4a; --soft:#1e222b; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:15px;line-height:1.5}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 48px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:26px;letter-spacing:-.02em}
+.updated{color:var(--muted);font-size:13px}
+.lede{margin:14px 0 22px;padding:12px 16px;border-radius:var(--radius);font-weight:600}
+.lede.ok{background:var(--ok-bg);color:var(--ok)}
+.lede.warn{background:var(--warn-bg);color:var(--warn)}
+.lede.bad{background:var(--bad-bg);color:var(--bad)}
+h2{font-size:17px;margin:30px 0 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.k-label{color:var(--muted);font-size:13px}
+.k-val{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}
+.k-val small{font-size:18px;color:var(--muted);font-weight:500}
+.k-sub{color:var(--muted);font-size:12px}
+.kpi.alert .k-val{color:var(--bad)}
+.chs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.ch header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
+.ch-name{font-weight:700;font-size:16px}
+.ch-name a{text-decoration:none}
+.ch-name a:hover{text-decoration:underline}
+.ch-meta{color:var(--muted);font-size:12px}
+.ch.st-miss,.ch.st-error{border-color:var(--bad)}
+.ch.st-manual{opacity:.75}
+.row{display:flex;justify-content:space-between;font-size:13px;padding:2px 0}
+.row span{color:var(--muted)}
+.last{font-size:13px;margin:2px 0 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.last a{color:var(--info)}
+.err{font-size:12px;color:var(--bad);word-break:break-all}
+.b{display:inline-flex;gap:4px;align-items:center;white-space:nowrap;font-size:12px;font-weight:600;
+  padding:3px 8px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.b-done{background:var(--ok-bg);color:var(--ok)}
+.b-miss,.b-error{background:var(--bad-bg);color:var(--bad)}
+.b-wait{background:var(--warn-bg);color:var(--warn)}
+.b-plan{background:var(--info-bg);color:var(--info)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%}
+.grid th,.grid td{text-align:center;padding:6px 4px;font-size:13px;border-bottom:1px solid var(--line)}
+.grid thead th{color:var(--muted);font-weight:600;font-size:12px;line-height:1.2}
+.grid thead th span{font-weight:400}
+.grid thead th.wkend{color:var(--bad)}
+.grid th[scope=row]{text-align:left;white-space:nowrap;padding-right:12px;font-weight:600}
+.grid .today{background:var(--soft)}
+.g{font-weight:700;min-width:30px}
+.g-done{color:var(--ok)} .g-miss,.g-error{color:var(--bad)} .g-wait{color:var(--warn)}
+.g-plan{color:var(--info)} .g-off,.g-unknown,.g-manual{color:var(--muted);font-weight:400}
+.legend{color:var(--muted);font-size:12px;margin-top:10px;display:flex;gap:4px 14px;flex-wrap:wrap}
+.lg{font-weight:700}
+.list td{padding:8px 6px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+.list thead td{color:var(--muted);font-size:12px;font-weight:600}
+.list a{color:var(--info);text-decoration:none}
+.list a:hover{text-decoration:underline}
+.nowrap{white-space:nowrap}
+.empty{color:var(--muted);text-align:center;padding:20px}
+footer{margin-top:28px;color:var(--muted);font-size:12px}
+@media (max-width:560px){ h1{font-size:22px} .k-val{font-size:26px} .list td:nth-child(2){display:none}
+  .kpis{grid-template-columns:1fr 1fr} .kpi{padding:12px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>프로젝트PM 발행 현황판</h1>
+    <div class="updated">마지막 확인 {{UPDATED}} · 매시간 자동 확인</div>
+  </div>
+  <p class="lede {{LEDE_CLS}}">{{LEDE}}</p>
+
+  <section class="kpis" aria-label="요약">{{KPIS}}</section>
+
+  <h2>채널별 오늘 상태</h2>
+  <section class="chs">{{CARDS}}</section>
+
+  <h2>날짜별 발행 기록</h2>
+  <section class="card">
+    <div class="scroll">
+      <table class="grid">
+        <thead><tr><th></th>{{GRID_HEAD}}</tr></thead>
+        <tbody>{{GRID_BODY}}</tbody>
+      </table>
+    </div>
+    <div class="legend">{{LEGEND}} · 숫자는 같은 날 2건 이상</div>
+  </section>
+
+  <h2>최근 발행 글</h2>
+  <section class="card scroll">
+    <table class="list">
+      <thead><tr><td>발행 시각</td><td>채널</td><td>제목</td></tr></thead>
+      <tbody>{{RECENT}}</tbody>
+    </table>
+  </section>
+
+  <footer>
+    각 채널의 RSS·사이트맵을 읽어 판정합니다. 예정일 마감 시각까지 글이 없으면 ‘누락’으로 표시합니다.
+    채널 추가·주기 변경은 저장소의 channels.json에서 합니다.
+  </footer>
+</div>
+<script>
+  // 좁은 화면에서 날짜 표가 오늘 열을 보이도록 스크롤
+  document.querySelectorAll('.grid').forEach(function (t) {
+    var th = t.querySelector('thead th.today'), box = t.closest('.scroll');
+    if (th && box) box.scrollLeft = th.offsetLeft - box.clientWidth / 2;
+  });
+</script>
+</body>
+</html>

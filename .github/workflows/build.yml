@@ -1,0 +1,67 @@
+name: 발행 현황판 갱신
+
+on:
+  schedule:
+    - cron: "7 * * * *"   # 매시 7분 (UTC 기준, 한국 시간도 매시 7분)
+  workflow_dispatch:       # Actions 탭에서 수동 실행
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 채널 피드 확인 및 페이지 생성
+        run: python build.py --out build
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 비밀번호로 암호화
+        env:
+          STATICRYPT_PASSWORD: ${{ secrets.PM_PASSWORD }}
+          PM_SALT: ${{ secrets.PM_SALT }}
+          PM_DOMAIN: ${{ vars.PM_DOMAIN }}
+        run: |
+          test -n "$STATICRYPT_PASSWORD" || { echo "::error::PM_PASSWORD 시크릿이 없습니다"; exit 1; }
+          echo "$PM_SALT" | grep -Eq '^[0-9a-f]{32}$' || { echo "::error::PM_SALT 시크릿은 16진수 32자여야 합니다"; exit 1; }
+          npx --yes staticrypt@3 build/index.html -d dist -c false \
+            --salt "$PM_SALT" --short --remember 30 \
+            --template-title "프로젝트PM" \
+            --template-instructions "비밀번호를 입력하세요." \
+            --template-placeholder "비밀번호" \
+            --template-button "열기" \
+            --template-remember "이 기기에서 30일간 기억" \
+            --template-error "비밀번호가 틀렸습니다." \
+            --template-color-primary "#1d4ed8" \
+            --template-color-secondary "#f3f4f6"
+          printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
+          if [ -n "$PM_DOMAIN" ]; then echo "$PM_DOMAIN" > dist/CNAME; fi
+          # 암호화 전 원본이 배포물에 섞이지 않았는지 확인
+          ! grep -q "발행 현황판</title>" dist/index.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
