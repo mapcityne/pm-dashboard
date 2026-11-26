@@ -360,6 +360,14 @@ def main():
         r = results[ch["id"]]
         print(f"[{ch['id']}] ok={r['ok']} posts={len(r['posts'])} {r['error']}")
 
+    today_posts = sorted(
+        ((p["at"], ch["name"], p["title"], p["url"]) for ch in channels
+         for p in results[ch["id"]]["posts"] if p["at"].date() == now.date()),
+        key=lambda x: x[0])
+    print(f"오늘 발행 {len(today_posts)}건")
+    for at, name, title, url in today_posts:
+        print(f"TODAY|{at:%H:%M}|{name}|{title}|{url}")
+
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     (out / "index.html").write_text(render(channels, results, now), encoding="utf-8")
